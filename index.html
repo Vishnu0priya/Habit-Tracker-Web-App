@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Habit Tracker — Single File SPA</title>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root{
+      --bg:#0f1724; --card:#0b1220; --muted:#9aa4b2; --accent:#6ee7b7; --danger:#ff7a7a; --glass: rgba(255,255,255,0.03);
+      --radius:12px; font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,#071021 0%,#071827 60%);color:#e6eef5}
+    .wrap{max-width:1100px;margin:28px auto;padding:20px}
+    header{display:flex;gap:16px;align-items:center;justify-content:space-between}
+    h1{font-size:20px;margin:0}
+    p.lead{margin:0;color:var(--muted)}
+    .grid{display:grid;grid-template-columns:360px 1fr;gap:18px;margin-top:18px}
+
+    /* left column */
+    .card{background:var(--card);padding:16px;border-radius:var(--radius);box-shadow:0 6px 18px rgba(2,6,23,0.6)}
+    form .row{display:flex;gap:8px;margin-bottom:8px}
+    input,select,button,textarea{font:inherit}
+    input[type=text], select{flex:1;padding:10px;border-radius:10px;border:0;background:var(--glass);color:inherit}
+    .btn{padding:8px 12px;border-radius:10px;border:0;background:linear-gradient(90deg,var(--accent),#34d399);color:#032;cursor:pointer}
+    .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
+    .habit-list{margin-top:12px;display:flex;flex-direction:column;gap:10px}
+    .habit{display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent)}
+    .habit .meta{flex:1}
+    .habit h3{margin:0;font-size:15px}
+    .small{font-size:12px;color:var(--muted)}
+    .actions{display:flex;gap:8px}
+    .icon-btn{background:transparent;border:0;color:var(--muted);cursor:pointer;padding:6px;border-radius:8px}
+
+    /* right column */
+    .stats{display:flex;gap:12px;margin-bottom:12px}
+    .stat{flex:1;padding:12px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent)}
+    canvas{max-width:100%}
+
+    /* habit detail */
+    .detail{margin-top:12px}
+    .days{display:flex;flex-wrap:wrap;gap:6px}
+    .day{width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:var(--glass);cursor:pointer}
+    .day.done{background:linear-gradient(90deg,var(--accent),#34d399);color:#003}
+
+    footer{margin-top:18px;color:var(--muted);font-size:13px}
+
+    /* responsive */
+    @media(max-width:980px){.grid{grid-template-columns:1fr;}.wrap{padding:12px}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>Habit Tracker</h1>
+        <p class="lead">Track daily habits, set goals, and visualize progress — all in the browser.</p>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button id="exportBtn" class="btn ghost">Export JSON</button>
+        <input id="importFile" type="file" accept="application/json" style="display:none"/>
+        <button id="importBtn" class="btn">Import</button>
+      </div>
+    </header>
+
+    <main class="grid">
+      <section>
+        <div class="card">
+          <form id="addForm">
+            <div class="row">
+              <input id="name" type="text" placeholder="Habit name (e.g. Read 20 pages)" required />
+              <select id="freq">
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly (goal: times per week)</option>
+              </select>
+            </div>
+            <div class="row">
+              <input id="target" type="number" min="1" value="1" style="width:110px" />
+              <button class="btn" type="submit">Add Habit</button>
+              <button id="clearAll" type="button" class="btn ghost">Clear All</button>
+            </div>
+            <div class="small">Tip: Use <strong>weekly</strong> for habits like "Exercise 3x" — set the target to the number of times per week.</div>
+          </form>
+
+          <div class="habit-list" id="habitList"></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="card">
+          <div class="stats">
+            <div class="stat">
+              <div class="small">Total habits</div>
+              <div id="totalHabits" style="font-size:22px;margin-top:6px">0</div>
+            </div>
+            <div class="stat">
+              <div class="small">Average completion (30d)</div>
+              <div id="avgCompletion" style="font-size:22px;margin-top:6px">0%</div>
+            </div>
+            <div class="stat">
+              <div class="small">Longest streak</div>
+              <div id="longestStreak" style="font-size:22px;margin-top:6px">0</div>
+            </div>
+          </div>
+
+          <canvas id="overviewChart" height="120"></canvas>
+
+          <div class="detail card" id="detailCard" style="margin-top:12px">
+            <div id="noSelection" class="small">Select a habit to see details and mark days.</div>
+            <div id="detailArea" style="display:none">
+              <h3 id="detailTitle"></h3>
+              <div class="small">Streak: <span id="streakCount">0</span>  •  Progress (30d): <span id="progress30">0%</span></div>
+              <div style="margin-top:8px"></div>
+              <div class="days" id="daysContainer"></div>
+              <div style="margin-top:10px;display:flex;gap:8px">
+                <button id="markToday" class="btn">Mark Today</button>
+                <button id="unmarkToday" class="btn ghost">Unmark Today</button>
+              </div>
+            </div>
+          </div>
+
+          <footer>Data stored locally in your browser (localStorage). No backend required.</footer>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    /* ----------------- Utilities ----------------- */
+    const uid = ()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+    const todayISO = (d=new Date())=>d.toISOString().slice(0,10);
+    const addDaysISO = (iso, amount)=>{ const d=new Date(iso); d.setDate(d.getDate()+amount); return d.toISOString().slice(0,10) };
+
+    /* ----------------- Storage ----------------- */
+    const STORE_KEY = 'habit-tracker-v1';
+    function load(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY) || '[]') }catch(e){return []} }
+    function save(data){ localStorage.setItem(STORE_KEY, JSON.stringify(data)) }
+
+    /* ----------------- Model ----------------- */
+    let habits = load(); // each habit: {id,name,freq:'daily'|'weekly',target:int,records:{'2025-12-12':true},created:'2025-01-01'}
+    let selectedId = null;
+
+    /* ----------------- DOM ----------------- */
+    const el = id=>document.getElementById(id);
+    const addForm = el('addForm');
+    const habitList = el('habitList');
+    const totalHabits = el('totalHabits');
+    const avgCompletion = el('avgCompletion');
+    const longestStreak = el('longestStreak');
+    const overviewChartCtx = document.getElementById('overviewChart').getContext('2d');
+    const detailCard = el('detailCard');
+    const noSelection = el('noSelection');
+    const detailArea = el('detailArea');
+    const detailTitle = el('detailTitle');
+    const daysContainer = el('daysContainer');
+    const streakCount = el('streakCount');
+    const progress30 = el('progress30');
+    const markTodayBtn = el('markToday');
+    const unmarkTodayBtn = el('unmarkToday');
+    const exportBtn = el('exportBtn');
+    const importBtn = el('importBtn');
+    const importFile = el('importFile');
+    const clearAll = el('clearAll');
+
+    /* ----------------- Charts ----------------- */
+    let overviewChart = null;
+    function drawOverview(){
+      // show aggregated completion percent per day for last 30 days
+      const days = 30; const labels=[]; const data=[];
+      for(let i=days-1;i>=0;i--){ const iso=addDaysISO(todayISO(), -i); labels.push(iso.slice(5)); // MM-DD
+        let total=0, done=0; for(const h of habits){ total+=1; if(h.records && h.records[iso]) done+=1 }
+        data.push(total? Math.round(100*done/total) : 0);
+      }
+      if(overviewChart) overviewChart.destroy();
+      overviewChart = new Chart(overviewChartCtx,{
+        type:'line', data:{labels, datasets:[{label:'Completion % (habits)', data, fill:true, tension:0.3}]}, options:{plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true, max:100}}}
+      })
+    }
+
+    /* ----------------- Calculations ----------------- */
+    function getLastNDates(n){ const a=[]; for(let i=0;i<n;i++) a.push(addDaysISO(todayISO(), -i)); return a }
+
+    function habitProgress(habit, nDays=30){ const days=getLastNDates(nDays); let done=0; for(const d of days) if(habit.records && habit.records[d]) done++; return Math.round(100*done/days.length) }
+
+    function computeStreak(habit){ // current streak of consecutive days up to today (for daily). For weekly, count weeks where target met.
+      if(habit.freq==='daily'){
+        let count=0; let day=todayISO(); while(habit.records && habit.records[day]){count++; day=addDaysISO(day,-1)} return count
+      }else{
+        // weekly: compute how many continuous weeks (ending this week) where target met
+        const weeksToCheck=52; let count=0; let curEnd=new Date(); curEnd.setDate(curEnd.getDate()-curEnd.getDay()); // Sunday end
+        for(let w=0;w<weeksToCheck;w++){
+          // week range Mon-Sun
+          const end=addDaysISO(curEnd.toISOString().slice(0,10), -7*w);
+          const start=addDaysISO(end, -6);
+          // count records in range
+          let met=false; let cnt=0; let d=new Date(start);
+          while(d.toISOString().slice(0,10) <= end){ if(habit.records && habit.records[d.toISOString().slice(0,10)]) cnt++; d.setDate(d.getDate()+1) }
+          if(cnt >= (habit.target||1)) count++; else break;
+        }
+        return count
+      }
+    }
+
+    function longestStreakAll(){ let best=0; for(const h of habits){ best=Math.max(best, computeLongest(h)) } return best }
+    function computeLongest(h){ if(h.freq==='daily'){
+      // find longest consecutive run in records
+      const dates = Object.keys(h.records||{}).sort(); if(!dates.length) return 0; let best=0,cur=1; for(let i=1;i<dates.length;i++){ const prev=new Date(dates[i-1]); const curd=new Date(dates[i]); const diff=(curd-prev)/86400000; if(diff===1) cur++; else cur=1; best=Math.max(best,cur)} best=Math.max(best,cur); return best
+    }else{
+      // for weekly, approximate by scanning weeks and counting consecutive weeks met
+      const weeks = {};
+      for(const d of Object.keys(h.records||{})){
+        const dt=new Date(d); const wStart=new Date(dt); wStart.setDate(dt.getDate()-dt.getDay()+1); const key=wStart.toISOString().slice(0,10); weeks[key]=(weeks[key]||0)+1;
+      }
+      const keys=Object.keys(weeks).sort(); let best=0,cur=0; let prev=null; for(const k of keys){ if(prev){ const diff=(new Date(k)-new Date(prev))/86400000; if(diff===7) { if(weeks[k] >= h.target) cur++; else cur=0 } else { cur = weeks[k] >= h.target ? 1 : 0 } } else cur = weeks[k] >= h.target ? 1 : 0; best=Math.max(best,cur); prev=k }
+      return best
+    }}
+
+    /* ----------------- Render ----------------- */
+    function renderList(){ habitList.innerHTML=''; for(const h of habits){ const div=document.createElement('div'); div.className='habit'; div.dataset.id=h.id; const pct = habitProgress(h,30);
+        div.innerHTML = `
+          <div class="meta">
+            <h3>${escapeHtml(h.name)}</h3>
+            <div class="small">${h.freq==='daily' ? 'Daily' : 'Weekly • target: '+h.target} • Last 30d: ${pct}%</div>
+          </div>
+          <div class="actions">
+            <button class="icon-btn" data-action="select">🔍</button>
+            <button class="icon-btn" data-action="edit">✏️</button>
+            <button class="icon-btn" data-action="delete">🗑️</button>
+          </div>`;
+        habitList.appendChild(div);
+    }
+    totalHabits.textContent = habits.length;
+    avgCompletion.textContent = habits.length ? `${Math.round(habits.reduce((s,h)=>s+habitProgress(h,30),0)/habits.length)}%` : '0%';
+    longestStreak.textContent = longestStreakAll();
+    drawOverview();
+    }
+
+    function escapeHtml(s){ return (s+'').replace(/[&<>"']/g,c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' })[c]) }
+
+    /* ----------------- Selection & Detail ----------------- */
+    function selectHabit(id){ selectedId = id; const h = habits.find(x=>x.id===id); if(!h){ noSelection.style.display='block'; detailArea.style.display='none'; return }
+      noSelection.style.display='none'; detailArea.style.display='block'; detailTitle.textContent = h.name; streakCount.textContent = computeStreak(h);
+      progress30.textContent = habitProgress(h,30)+'%';
+      // render last 30 days as day buttons
+      const days = getLastNDates(30).reverse(); daysContainer.innerHTML=''; for(const d of days){ const b=document.createElement('div'); b.className='day'+(h.records && h.records[d] ? ' done':''); b.dataset.day=d; b.title=d; b.textContent = d.slice(5); b.addEventListener('click', ()=>toggleDay(d)); daysContainer.appendChild(b) }
+    }
+
+    function toggleDay(iso){ const h = habits.find(x=>x.id===selectedId); if(!h) return; h.records = h.records || {}; if(h.records[iso]) delete h.records[iso]; else h.records[iso]=true; save(habits); renderList(); selectHabit(selectedId);
+    }
+
+    markTodayBtn.addEventListener('click', ()=>{ if(!selectedId) return; const h=habits.find(x=>x.id===selectedId); h.records=h.records||{}; h.records[todayISO()]=true; save(habits); renderList(); selectHabit(selectedId); })
+    unmarkTodayBtn.addEventListener('click', ()=>{ if(!selectedId) return; const h=habits.find(x=>x.id===selectedId); if(h.records) delete h.records[todayISO()]; save(habits); renderList(); selectHabit(selectedId); })
+
+    /* ----------------- Form actions ----------------- */
+    addForm.addEventListener('submit', (e)=>{ e.preventDefault(); const name=el('name').value.trim(); const freq=el('freq').value; const target=Math.max(1, parseInt(el('target').value)||1);
+      const h={id:uid(),name,freq,target,records:{},created:todayISO()}; habits.unshift(h); save(habits); addForm.reset(); el('target').value=1; renderList(); selectHabit(h.id);
+    })
+
+    habitList.addEventListener('click', e=>{
+      const btn = e.target.closest('button'); const div = e.target.closest('.habit'); if(!div) return; const id=div.dataset.id; const action = btn ? btn.dataset.action : null; if(action==='select') selectHabit(id); else if(action==='delete'){ if(confirm('Delete habit?')){ habits = habits.filter(h=>h.id!==id); save(habits); if(selectedId===id) { selectedId=null; noSelection.style.display='block'; detailArea.style.display='none' } renderList() } } else if(action==='edit'){
+        const h = habits.find(h=>h.id===id); const newName = prompt('Edit name', h.name); if(newName===null) return; h.name=newName.trim()||h.name; const newTarget=prompt('Target (number)', h.target); if(newTarget!==null){ const t=parseInt(newTarget)||1; h.target=t } save(habits); renderList(); selectHabit(id);
+      }
+    })
+
+    /* ----------------- Export / Import ----------------- */
+    exportBtn.addEventListener('click', ()=>{
+      const data = JSON.stringify(habits, null, 2);
+      const blob = new Blob([data], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a=document.createElement('a'); a.href=url; a.download='habits.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    })
+
+    importBtn.addEventListener('click', ()=> importFile.click());
+    importFile.addEventListener('change', async(e)=>{
+      const f=e.target.files[0]; if(!f) return; try{ const txt=await f.text(); const data=JSON.parse(txt); if(!Array.isArray(data)) throw new Error('Invalid file'); habits=data; save(habits); renderList(); alert('Imported.'); }catch(err){ alert('Import failed: '+err.message) } finally{ importFile.value='' }
+    })
+
+    clearAll.addEventListener('click', ()=>{ if(confirm('Delete ALL habits?')){ habits=[]; save(habits); renderList(); selectedId=null; noSelection.style.display='block'; detailArea.style.display='none' } })
+
+    /* ----------------- Init ----------------- */
+    renderList(); if(habits.length) selectHabit(habits[0].id);
+
+    // small helper for demo data (uncomment to seed)
+    // if(!habits.length){ habits=[{id:uid(),name:'Read 20 pages',freq:'daily',target:1,records:{},created:todayISO()},{id:uid(),name:'Exercise',freq:'weekly',target:3,records:{},created:todayISO()}]; save(habits); renderList(); }
+  </script>
+</body>
+</html>

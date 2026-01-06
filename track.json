@@ -1,0 +1,133 @@
+[
+  {
+    "id": "h1",
+    "name": "Read 20 pages",
+    "freq": "daily",
+    "target": 1,
+    "created": "2025-01-01",
+    "records": {
+      "2025-02-01": true,
+      "2025-02-02": true,
+      "2025-02-03": true,
+      "2025-02-05": true,
+      "2025-02-06": true,
+      "2025-02-07": true
+    }
+  },
+  {
+    "id": "h2",
+    "name": "Exercise",
+    "freq": "weekly",
+    "target": 3,
+    "created": "2025-01-05",
+    "records": {
+      "2025-01-06": true,
+      "2025-01-08": true,
+      "2025-01-10": true,
+      "2025-01-14": true,
+      "2025-01-17": true
+    }
+  },
+  {
+    "id": "h3",
+    "name": "Drink 3L Water",
+    "freq": "daily",
+    "target": 1,
+    "created": "2025-01-10",
+    "records": {
+      "2025-02-02": true,
+      "2025-02-03": true,
+      "2025-02-06": true,
+      "2025-02-07": true
+    }
+  },
+  {
+    "id": "h4",
+    "name": "Meditation",
+    "freq": "weekly",
+    "target": 5,
+    "created": "2025-01-12",
+    "records": {
+      "2025-02-01": true,
+      "2025-02-02": true,
+      "2025-02-03": true,
+      "2025-02-04": true,
+      "2025-02-05": true
+    }
+  },
+  {
+    "id": "h5",
+    "name": "Morning Walk",
+    "freq": "daily",
+    "target": 1,
+    "created": "2025-01-15",
+    "records": {
+      "2025-02-01": true,
+      "2025-02-03": true,
+      "2025-02-05": true,
+      "2025-02-06": true
+    }
+  },
+  {
+    "id": "h6",
+    "name": "No Sugar",
+    "freq": "daily",
+    "target": 1,
+    "created": "2025-01-20",
+    "records": {
+      "2025-02-02": true,
+      "2025-02-05": true,
+      "2025-02-06": true
+    }
+  },
+  {
+    "id": "h7",
+    "name": "Study Coding",
+    "freq": "daily",
+    "target": 1,
+    "created": "2025-01-22",
+    "records": {
+      "2025-02-01": true,
+      "2025-02-02": true,
+      "2025-02-04": true,
+      "2025-02-06": true,
+      "2025-02-07": true
+    }
+  },
+  {
+    "id": "h8",
+    "name": "Yoga Stretch",
+    "freq": "weekly",
+    "target": 4,
+    "created": "2025-01-25",
+    "records": {
+      "2025-02-01": true,
+      "2025-02-03": true,
+      "2025-02-05": true,
+      "2025-02-07": true
+    }
+  },
+  {
+    "id": "h9",
+    "name": "Practice Gratitude",
+    "freq": "daily",
+    "target": 1,
+    "created": "2025-01-28",
+    "records": {
+      "2025-02-01": true,
+      "2025-02-02": true,
+      "2025-02-03": true
+    }
+  },
+  {
+    "id": "h10",
+    "name": "Clean Room",
+    "freq": "weekly",
+    "target": 2,
+    "created": "2025-01-30",
+    "records": {
+      "2025-02-02": true,
+      "2025-02-05": true
+    }
+  }
+]

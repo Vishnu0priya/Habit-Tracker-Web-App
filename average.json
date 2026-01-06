@@ -1,0 +1,92 @@
+[
+  {
+    "name": "Drink Water",
+    "type": "daily",
+    "trackedDays": 30,
+    "completedDays": 24,
+    "averageCompletion": "80%",
+    "longestStreak": 10,
+    "pattern": "✔✔✔✔✔✔✔✔✔✔✘✘✔✔✔✔✔✘✔✔✘✔✔✔✘✘✔✔"
+  },
+  {
+    "name": "Morning Walk",
+    "type": "daily",
+    "trackedDays": 30,
+    "completedDays": 20,
+    "averageCompletion": "66.67%",
+    "longestStreak": 6,
+    "pattern": "✔✔✔✘✔✔✔✔✔✘✘✘✔✔✘✔✔✘✘✔✔✘✔✘✔✘✘✘"
+  },
+  {
+    "name": "Reading",
+    "type": "daily",
+    "trackedDays": 30,
+    "completedDays": 18,
+    "averageCompletion": "60%",
+    "longestStreak": 4,
+    "pattern": "✔✔✘✔✘✔✔✔✘✘✔✘✔✘✘✔✔✘✘✘✔✘✔✘✘✔✘✘✔"
+  },
+  {
+    "name": "Meditation",
+    "type": "daily",
+    "trackedDays": 30,
+    "completedDays": 22,
+    "averageCompletion": "73.33%",
+    "longestStreak": 8,
+    "pattern": "✔✔✔✔✔✘✔✔✔✔✘✔✔✔✘✘✔✔✔✔✔✘✔✘✔✔✘✔"
+  },
+  {
+    "name": "Workout",
+    "type": "daily",
+    "trackedDays": 30,
+    "completedDays": 15,
+    "averageCompletion": "50%",
+    "longestStreak": 3,
+    "pattern": "✔✘✔✘✔✘✔✘✘✔✘✘✔✘✔✘✘✘✔✘✔✘✘✔✘✘✘✘✘"
+  },
+  {
+    "name": "Journaling",
+    "type": "daily",
+    "trackedDays": 30,
+    "completedDays": 26,
+    "averageCompletion": "86.67%",
+    "longestStreak": 12,
+    "pattern": "✔✔✔✔✔✔✔✔✔✔✔✔✘✔✔✔✔✔✔✔✘✔✔✔✔✔✔✔"
+  },
+  {
+    "name": "No Sugar",
+    "type": "daily",
+    "trackedDays": 30,
+    "completedDays": 17,
+    "averageCompletion": "56.67%",
+    "longestStreak": 5,
+    "pattern": "✔✔✔✔✔✘✘✔✘✘✔✔✘✘✔✔✘✔✘✘✘✔✘✔✘✔✘✘✘"
+  },
+  {
+    "name": "Study 1 Hour",
+    "type": "daily",
+    "trackedDays": 30,
+    "completedDays": 21,
+    "averageCompletion": "70%",
+    "longestStreak": 7,
+    "pattern": "✔✔✔✘✔✔✔✔✔✘✘✔✔✔✘✔✔✘✘✔✔✘✘✔✔✘✔✘✔"
+  },
+  {
+    "name": "Sleep Before 11 PM",
+    "type": "daily",
+    "trackedDays": 30,
+    "completedDays": 19,
+    "averageCompletion": "63.33%",
+    "longestStreak": 6,
+    "pattern": "✔✔✔✔✔✘✘✔✔✘✔✘✔✘✘✔✘✔✘✔✘✘✘✔✔✘✔✘✘"
+  },
+  {
+    "name": "Healthy Breakfast",
+    "type": "daily",
+    "trackedDays": 30,
+    "completedDays": 23,
+    "averageCompletion": "76.67%",
+    "longestStreak": 9,
+    "pattern": "✔✔✔✔✔✔✔✔✔✘✔✔✔✘✔✔✔✘✔✔✔✘✔✔✔✘✔✘✔"
+  }
+]
